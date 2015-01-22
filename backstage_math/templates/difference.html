@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form id="numberChooser" name="numberChooser" method="GET">
+	<label form="number">Choose a number 1-100</label>
+	<input type="text" name="number" id="number"></input>
+	<input type="submit" value="Calculate differentials">
+</form>
+
+<div id="diff"></div>  
+    <script type="text/javascript">
+  var Differential = Backbone.Model.extend({
+	  initialize: function () {
+        console.log("Differential created");
+      },
+	  url:'/difference/?number=1'
+  });
+  var templateString = '<section class="differential"><ul><li>Number Differenced: <%= number %></li><li>Date/Time:<%= datetime %></li><li>Differential Value: <%= value %></li><li>Occurrences of this differential: <%= occurrences %></li></ul></section>  ';
+  
+  var FormCapture = Backbone.View.extend({
+	      template: _.template(templateString),
+	      el: $("form"),
+	      initialize: function () {
+            //console.log("initialize");
+            this.numberInput = $('#number');
+          },
+	      events: {
+            'submit': 'submit',
+            'change input[type!="submit"]': 'onInputChange',
+            'blur input[type!="submit"]': 'onInputChange',
+            'change input.content': 'contentChanged'
+		  },
+		  submit: function (e) {
+            //console.log("submit:");
+            e.preventDefault();
+            var numberVal = this.numberInput.val();
+            if (!numberVal) {
+	            return;
+	        }
+	        numberVal = parseInt(numberVal);
+	        if (numberVal >= 1 && numberVal <= 100) {
+              console.log('creating diff');
+              var aDiff = new Differential;
+              aDiff.url = '/difference/?number=' + numberVal
+              //console.log('fetching');
+              aDiff.fetch();
+              // TODO...even after string conversion, datetime is not parsing in the JSON?
+              alert(aDiff);
+              var aDiffJson = aDiff.toJSON();
+              var diffTemplate = this.template(aDiffJson);
+              $("#diff").append(diffTemplate);
+             }
+          }
+	    });
+  
+$(function() {
+    var formCapt = new FormCapture;
+    
+});
+</script>
+{% endblock %}
